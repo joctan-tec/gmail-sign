@@ -7,12 +7,12 @@
 <style>
   :root {
     --bg: #e5e7eb; --panel: #ffffff; --ink: #111827; --muted: #4b5563;
-    --line: #d1d5db; --brand: #2563eb; --brand-ink: #ffffff; --focus: #1d4ed8;
+    --line: #d1d5db; --brand: #2563eb; --brand-ink: #ffffff; --focus: #1d4ed8; --warn: #b45309;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0f141b; --panel: #18202b; --ink: #e8edf4; --muted: #9aa6b8;
-      --line: #2c3748; --brand: #5b9bff; --brand-ink: #0b1220; --focus: #9cc2ff;
+      --line: #2c3748; --brand: #5b9bff; --brand-ink: #0b1220; --focus: #9cc2ff; --warn: #fbbf24;
     }
   }
   * { box-sizing: border-box; }
@@ -25,38 +25,53 @@
   @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
   section { background: var(--panel); border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
   h2 { font-size: 14px; margin: 0 0 12px; }
-  fieldset { border: 0; border-top: 1px solid var(--line); margin: 14px 0 0; padding: 12px 0 0; }
+  fieldset { border: 0; border-top: 1px solid var(--line); margin: 14px 0 0; padding: 12px 0 0; min-width: 0; }
   legend { font-size: 13px; font-weight: bold; padding: 0 6px 0 0; }
   .field { margin-bottom: 10px; }
   label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 3px; }
   input[type=text] { width: 100%; padding: 8px 9px; border: 1px solid var(--line); border-radius: 6px;
     background: transparent; color: var(--ink); font: inherit; font-size: 13px; }
+  input::placeholder { color: var(--muted); opacity: .7; }
   input:focus-visible, button:focus-visible, .tab:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 1px; }
   .hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .field.unused label::after { content: " · no lo usa este estilo"; font-weight: normal; color: var(--muted); }
+  .field.unused input { opacity: .55; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
   .tab { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid var(--line);
-    border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; margin: 0; }
+    border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; margin: 0; }
+  .tab input { margin: 0; }
   .tab:has(input:checked) { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 14%, transparent); }
+  .desc { font-size: 12px; color: var(--muted); margin: 0 0 12px; }
+  .info { font-size: 12px; margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); }
+  .info p { margin: 0 0 4px; } .info p:last-child { margin: 0; }
+  .info code { background: color-mix(in srgb, var(--ink) 8%, transparent); padding: 0 4px; border-radius: 3px; color: var(--ink); }
   .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
   button { font: inherit; font-size: 12px; font-weight: bold; padding: 8px 14px; border-radius: 6px;
     border: 1px solid var(--brand); background: var(--brand); color: var(--brand-ink); cursor: pointer; }
   button.secondary { background: transparent; color: var(--brand); }
   button.link { border: 0; background: none; color: var(--muted); text-decoration: underline; font-weight: normal; padding: 8px 2px; }
-  .stage { background: #ffffff; border-radius: 8px; padding: 24px; overflow-x: auto; border: 1px solid var(--line); }
+  .stage { background: #ffffff; border-radius: 8px; padding: 24px; overflow-x: auto; border: 1px solid var(--line); min-height: 120px; }
   .status { min-height: 1.4em; font-size: 12px; margin: 10px 0 0; }
-  .warn { color: #b45309; }
-  @media (prefers-color-scheme: dark) { .warn { color: #fbbf24; } }
+  .warn { color: var(--warn); }
   details { margin-top: 14px; font-size: 13px; }
   summary { cursor: pointer; font-weight: bold; }
-  ol { padding-left: 20px; margin: 8px 0 0; }
   textarea { width: 100%; min-height: 140px; margin-top: 10px; font: 11px/1.4 ui-monospace, Menlo, Consolas, monospace;
     background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
 </style>
+<script>
+  /* Registro de estilos: cada archivo de templates/ se registra aquí al cargarse. */
+  window.GmailSign = {
+    manifest: [],
+    styles: {},
+    register: function (def) { this.styles[def.id] = def; }
+  };
+</script>
+<script src="templates/manifest.js"></script>
 </head>
 <body>
 <main>
   <h1>Generador de firma para Gmail</h1>
-  <p class="lead">Completa los datos, elige un concepto y la firma se actualiza al instante. Luego pulsa «Copiar firma» y pégala en Gmail → Ajustes → Ver todos los ajustes → Firma.</p>
+  <p class="lead">Elige un estilo, completa tus datos y la firma se actualiza al instante. Luego pulsa «Copiar firma» y pégala en Gmail → Ajustes → Ver todos los ajustes → Firma.</p>
 
   <div class="layout">
     <section aria-labelledby="t-datos">
@@ -66,8 +81,8 @@
           <legend>Identidad</legend>
           <div class="field"><label for="nombre">Nombre completo</label><input id="nombre" type="text"></div>
           <div class="field"><label for="cargo">Cargo</label><input id="cargo" type="text"></div>
-          <div class="field"><label for="frase">Frase (concepto Terminal)</label><input id="frase" type="text"></div>
-          <div class="field"><label for="tags">Etiquetas (concepto Editorial)</label><input id="tags" type="text">
+          <div class="field"><label for="frase">Frase</label><input id="frase" type="text"></div>
+          <div class="field"><label for="tags">Etiquetas</label><input id="tags" type="text">
             <div class="hint">Separadas por coma; se muestran hasta 5.</div></div>
           <div class="field"><label for="prompt">Prompt del terminal</label><input id="prompt" type="text"></div>
         </fieldset>
@@ -79,8 +94,8 @@
           <div class="field"><label for="linkedin">URL de LinkedIn</label><input id="linkedin" type="text"></div>
           <div class="field"><label for="linkedinTexto">Texto visible de LinkedIn</label><input id="linkedinTexto" type="text"></div>
           <div class="field"><label for="ubicacion">Ubicación</label><input id="ubicacion" type="text"></div>
-          <div class="field"><label for="zona">Zona horaria (Terminal)</label><input id="zona" type="text"></div>
-          <div class="field"><label for="estado">Estado (Terminal)</label><input id="estado" type="text">
+          <div class="field"><label for="zona">Zona horaria</label><input id="zona" type="text"></div>
+          <div class="field"><label for="estado">Estado</label><input id="estado" type="text">
             <div class="hint">Déjalo vacío para ocultar el punto verde.</div></div>
         </fieldset>
 
@@ -95,15 +110,15 @@
         <fieldset>
           <legend>Imágenes (GitHub)</legend>
           <div class="field"><label for="ghUser">Usuario de GitHub</label><input id="ghUser" type="text">
-            <div class="hint">Obligatorio. El repositorio debe ser público.</div></div>
+            <div class="hint">Obligatorio si el estilo usa imágenes. El repositorio debe ser público.</div></div>
           <div class="field"><label for="repo">Repositorio</label><input id="repo" type="text">
-            <div class="hint">Si lo dejas vacío se usa <code>gmail-sign</code>.</div></div>
+            <div class="hint">Si lo dejas vacío se usa <code>gmail-signature</code>.</div></div>
           <div class="field"><label for="rama">Rama</label><input id="rama" type="text">
             <div class="hint">Si lo dejas vacío se usa <code>main</code>.</div></div>
           <div class="field"><label for="carpeta">Carpeta de imágenes</label><input id="carpeta" type="text">
             <div class="hint">Si lo dejas vacío se usa <code>assets</code>. Admite subcarpetas (<code>docs/img</code>). Escribe <code>/</code> si las imágenes están en la raíz del repo.</div></div>
           <div class="field"><label for="fotoArchivo">Nombre del archivo de la foto</label><input id="fotoArchivo" type="text">
-            <div class="hint">Si lo dejas vacío se usa <code>photo.jpg</code>. Los íconos mantienen sus nombres (ver README).</div></div>
+            <div class="hint">Si lo dejas vacío se usa <code>photo.jpg</code>.</div></div>
         </fieldset>
 
         <div class="bar"><button type="button" class="link" id="reset">Limpiar formulario</button></div>
@@ -111,12 +126,11 @@
     </section>
 
     <section aria-labelledby="t-prev">
-      <h2 id="t-prev">Vista previa</h2>
-      <div class="tabs" role="radiogroup" aria-label="Concepto">
-        <label class="tab"><input type="radio" name="tpl" value="terminal" checked> Concepto 1 · Terminal</label>
-        <label class="tab"><input type="radio" name="tpl" value="editorial"> Concepto 2 · Editorial</label>
-      </div>
+      <h2 id="t-prev">Estilo y vista previa</h2>
+      <div class="tabs" id="styles" role="radiogroup" aria-label="Estilo de la firma"></div>
+      <p class="desc" id="styleDesc"></p>
       <div class="stage" id="preview" aria-live="polite"></div>
+      <div class="info" id="info"></div>
       <div class="bar">
         <button type="button" id="copiar">Copiar firma</button>
         <button type="button" class="secondary" id="copiarHtml">Copiar código HTML</button>
@@ -133,6 +147,8 @@
 
 <script>
 (function () {
+  var GS = window.GmailSign;
+
   var PLACEHOLDERS = {
     nombre: "Tu Nombre Apellido",
     cargo: "Tu cargo o profesión",
@@ -150,14 +166,22 @@
     waTexto: "Escríbeme por WhatsApp",
     waMensaje: "Hola, te escribo desde tu firma de correo.",
     ghUser: "tu-usuario-de-github",
-    repo: "gmail-sign",
+    repo: "gmail-signature",
     rama: "main",
     carpeta: "assets",
     fotoArchivo: "photo.jpg"
   };
+  var CONFIG_KEYS = ["ghUser", "repo", "rama", "carpeta", "fotoArchivo"];
+  var DATA_KEYS = Object.keys(PLACEHOLDERS).filter(function (k) { return CONFIG_KEYS.indexOf(k) < 0; });
+  var LABELS = {
+    nombre: "Nombre", cargo: "Cargo", frase: "Frase", tags: "Etiquetas", prompt: "Prompt del terminal",
+    telefono: "Teléfono", correo: "Correo", linkedin: "LinkedIn", ubicacion: "Ubicación",
+    zona: "Zona horaria", estado: "Estado", whatsapp: "WhatsApp"
+  };
+  // Un dato del estilo puede cubrir varios campos del formulario.
+  var GROUPS = { linkedin: ["linkedin", "linkedinTexto"], whatsapp: ["whatsapp", "waTexto", "waMensaje"] };
+  var KEY = "gmail-sign:v5";
 
-
-  var KEY = "gmail-sign:v4";
   var ids = Object.keys(PLACEHOLDERS);
   var els = {};
   ids.forEach(function (id) {
@@ -168,11 +192,16 @@
   var htmlOut = document.getElementById("htmlOut");
   var statusEl = document.getElementById("status");
   var warnEl = document.getElementById("warn");
-  var radios = document.querySelectorAll('input[name="tpl"]');
+  var stylesEl = document.getElementById("styles");
+  var descEl = document.getElementById("styleDesc");
+  var infoEl = document.getElementById("info");
 
-  var MONO = "&quot;Courier New&quot;, Courier, monospace";
-  var SANS = "Verdana, Geneva, sans-serif";
+  var manifest = GS.manifest || [];
+  var active = null;
+  var activeId = null;
+  var token = 0;
 
+  /* ---------- utilidades ---------- */
   function esc(s) {
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
@@ -184,143 +213,113 @@
   }
   function digits(s) { return String(s).replace(/[^\d]/g, ""); }
   function tel(s) { return String(s).replace(/[^\d+]/g, ""); }
-
-  function seg(t) {
-    return String(t).split("/").filter(Boolean).map(encodeURIComponent).join("/");
+  function seg(t) { return String(t).split("/").filter(Boolean).map(encodeURIComponent).join("/"); }
+  function say(m) { statusEl.textContent = m; }
+  function msg(html) {
+    return '<p style="margin: 0; font-family: Verdana, Geneva, sans-serif; font-size: 13px; color: #6b7280">' + html + '</p>';
   }
+
   function base(d) {
     var u = d.ghUser.trim() || "YOUR_GITHUB_USER";
-    var r = d.repo.trim() || "gmail-sign";
+    var r = d.repo.trim() || "gmail-signature";
     var b = d.rama.trim() || "main";
     var f = d.carpeta.trim();
     f = (f === "/" || f === ".") ? "" : seg(f || "assets");
     return "https://raw.githubusercontent.com/" + encodeURIComponent(u) + "/" + encodeURIComponent(r) + "/" + seg(b) + "/" + (f ? f + "/" : "");
   }
-  function photo(d) { return base(d) + encodeURIComponent(d.fotoArchivo.trim() || "photo.jpg"); }
+  function photoName(d) { return d.fotoArchivo.trim() || "photo.jpg"; }
 
-  function icon(d, file, alt, size) {
-    return '<img src="' + base(d) + file + '" width="' + size + '" height="' + size + '" alt="' + alt +
-      '" style="display: block; width: ' + size + 'px; height: ' + size + 'px; border: 0" />';
-  }
-  function row(d, file, alt, inner) {
-    return '<tr><td valign="middle" style="padding-right: 10px">' + icon(d, file, alt, 16) +
-      '</td><td>' + inner + '</td></tr>';
-  }
-  function contactRows(d, p, linkColor, textColor, withPin) {
-    var out = "";
-    if (d.telefono.trim())
-      out += row(d, p + "phone.png", "Phone", '<a href="tel:' + esc(tel(d.telefono)) + '" style="color: ' + textColor + '; text-decoration: none">' + esc(d.telefono) + '</a>');
-    if (d.correo.trim())
-      out += row(d, p + "mail.png", "Email", '<a href="mailto:' + esc(d.correo.trim()) + '" style="color: ' + textColor + '; text-decoration: none">' + esc(d.correo) + '</a>');
+  /* ---------- datos que reciben los estilos ---------- */
+  // Todos los textos y URLs salen ya escapados para HTML: los estilos los insertan tal cual.
+  function normalize(d) {
     var li = safeUrl(d.linkedin);
-    if (li) {
-      var txt = d.linkedinTexto.trim() || li.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "");
-      out += row(d, p + "linkedin.png", "LinkedIn", '<a href="' + esc(li) + '" style="color: ' + linkColor + '; text-decoration: none">' + esc(txt) + '</a>');
-    }
-    if (withPin && d.ubicacion.trim())
-      out += row(d, p + "pin.png", "Location", esc(d.ubicacion));
-    return out;
-  }
-  function waLink(d) {
     var n = digits(d.whatsapp);
-    if (!n) return "";
-    return "https://wa.me/" + n + (d.waMensaje.trim() ? "?text=" + encodeURIComponent(d.waMensaje.trim()) : "");
-  }
-  function waButton(d, bg, border, radius, padding, size, spacing) {
-    var link = waLink(d);
-    if (!link) return "";
-    return '<table cellpadding="0" cellspacing="0" border="0" style="margin-top: 14px"><tr>' +
-      '<td bgcolor="' + bg + '" style="background: ' + bg + ';' + (border ? ' border: 1px solid ' + border + ';' : '') + ' border-radius: ' + radius + '">' +
-      '<a href="' + esc(link) + '" style="display: inline-block; padding: ' + padding + '; font-family: ' + SANS + '; font-size: ' + size +
-      '; font-weight: bold; color: #ffffff; text-decoration: none; letter-spacing: ' + spacing + '">' +
-      '<img src="' + base(d) + 'wa-white.png" width="14" height="14" alt="" style="vertical-align: middle; width: 14px; height: 14px; border: 0; margin-right: 7px" />' +
-      esc(d.waTexto.trim() || "WhatsApp") + '</a></td></tr></table>';
-  }
-
-  /* ---------- Concepto 1 · Terminal ---------- */
-  function sigTerminal(d) {
-    var rows = contactRows(d, "t-", "#58a6ff", "#c9d1d9", false);
-    var footerText = [d.ubicacion.trim() ? esc(d.ubicacion) : "", d.zona.trim() ? esc(d.zona) : ""].filter(Boolean).join(" &middot; ");
-    if (d.estado.trim()) footerText += ' &nbsp;&nbsp;<span style="color: #27c93f">&#9679;</span> ' + esc(d.estado);
-    var footer = footerText
-      ? '<tr><td bgcolor="#161b22" style="background: #161b22; padding: 8px 14px; border-top: 1px solid #30363d; border-radius: 0 0 9px 9px; font-family: ' + MONO + '; font-size: 10px; color: #8b949e">' +
-        '<table cellpadding="0" cellspacing="0" border="0"><tr>' +
-        (d.ubicacion.trim() ? '<td valign="middle" style="padding-right: 6px">' + icon(d, "t-pin.png", "Location", 12) + '</td>' : '') +
-        '<td style="font-family: ' + MONO + '; font-size: 10px; color: #8b949e">' + footerText + '</td></tr></table></td></tr>'
-      : '';
-
-    return '<table id="sig" cellpadding="0" cellspacing="0" border="0" width="520" style="width: 520px; max-width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 10px; border-collapse: separate">' +
-      '<tr><td bgcolor="#161b22" style="background: #161b22; padding: 9px 14px; border-bottom: 1px solid #30363d; border-radius: 9px 9px 0 0; font-family: ' + MONO + '; font-size: 11px; color: #8b949e">' +
-        '<span style="color: #ff5f56; font-size: 13px">&#9679;</span>&nbsp;<span style="color: #ffbd2e; font-size: 13px">&#9679;</span>&nbsp;<span style="color: #27c93f; font-size: 13px">&#9679;</span>&nbsp;&nbsp;' +
-        esc(d.prompt) + ' <span style="color: #58a6ff">~</span> % whoami</td></tr>' +
-      '<tr><td style="padding: 20px 20px 16px 20px; background: #0d1117">' +
-        '<table cellpadding="0" cellspacing="0" border="0"><tr>' +
-          '<td valign="top" style="padding-right: 18px"><img src="' + esc(photo(d)) + '" width="88" height="88" alt="' + esc(d.nombre) +
-            '" style="display: block; width: 88px; height: 88px; border-radius: 50%; border: 2px solid #58a6ff" /></td>' +
-          '<td valign="top">' +
-            '<div style="font-family: ' + SANS + '; font-size: 20px; font-weight: bold; color: #f0f6fc; letter-spacing: 0.3px; line-height: 1.2">' + esc(d.nombre) + '</div>' +
-            (d.cargo.trim() ? '<div style="font-family: ' + MONO + '; font-size: 12px; color: #58a6ff; margin-top: 6px">&gt; ' + esc(d.cargo) + '<span style="color: #7ee787">_</span></div>' : '') +
-            (d.frase.trim() ? '<div style="font-family: ' + MONO + '; font-size: 11px; color: #8b949e; margin-top: 4px">' + esc(d.frase) + '</div>' : '') +
-          '</td></tr></table>' +
-        (rows
-          ? '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 16px 0 12px 0"><tr><td height="1" style="height: 1px; line-height: 1px; font-size: 1px; background: #30363d">&nbsp;</td></tr></table>' +
-            '<table cellpadding="0" cellspacing="0" border="0" style="font-family: ' + MONO + '; font-size: 12px; line-height: 1.9">' + rows + '</table>'
-          : '') +
-        waButton(d, "#238636", "#2ea043", "6px", "8px 18px", "12px", "0.3px") +
-      '</td></tr>' + footer + '</table>';
+    var m = d.waMensaje.trim();
+    return {
+      nombre: esc(d.nombre.trim()),
+      cargo: esc(d.cargo.trim()),
+      frase: esc(d.frase.trim()),
+      tags: d.tags.split(",").map(function (t) { return t.trim(); }).filter(Boolean).slice(0, 5).map(esc),
+      prompt: esc(d.prompt.trim()),
+      telefono: esc(d.telefono.trim()),
+      telHref: esc(tel(d.telefono)),
+      correo: esc(d.correo.trim()),
+      linkedin: esc(li),
+      linkedinTexto: esc(li ? (d.linkedinTexto.trim() || li.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "")) : ""),
+      ubicacion: esc(d.ubicacion.trim()),
+      zona: esc(d.zona.trim()),
+      estado: esc(d.estado.trim()),
+      whatsapp: n ? esc("https://wa.me/" + n + (m ? "?text=" + encodeURIComponent(m) : "")) : "",
+      waTexto: esc(d.waTexto.trim() || "WhatsApp")
+    };
   }
 
-  /* ---------- Concepto 2 · Editorial ---------- */
-  var CHIPS = [
-    { bg: "#eff6ff", bd: "#bfdbfe", c: "#1d4ed8" },
-    { bg: "#f5f3ff", bd: "#ddd6fe", c: "#6d28d9" },
-    { bg: "#ecfeff", bd: "#a5f3fc", c: "#0e7490" }
-  ];
-  function sigEditorial(d) {
-    var tags = d.tags.split(",").map(function (t) { return t.trim(); }).filter(Boolean).slice(0, 5);
-    var chips = tags.map(function (t, i) {
-      var k = CHIPS[i % 3];
-      return (i ? '<td width="6">&nbsp;</td>' : '') +
-        '<td style="background: ' + k.bg + '; border: 1px solid ' + k.bd + '; border-radius: 12px; padding: 2px 10px; font-family: ' + SANS + '; font-size: 10px; color: ' + k.c + '">' + esc(t) + '</td>';
-    }).join("");
-    var rows = contactRows(d, "e-", "#374151", "#374151", true);
-
-    return '<table id="sig" cellpadding="0" cellspacing="0" border="0" width="520" style="width: 520px; max-width: 100%; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; border-collapse: separate">' +
-      '<tr><td style="border-radius: 10px 10px 0 0; padding: 0"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
-        '<td width="40%" height="5" bgcolor="#2563eb" style="height: 5px; line-height: 5px; font-size: 1px; background: #2563eb; border-radius: 10px 0 0 0">&nbsp;</td>' +
-        '<td width="35%" height="5" bgcolor="#7c3aed" style="height: 5px; line-height: 5px; font-size: 1px; background: #7c3aed">&nbsp;</td>' +
-        '<td width="25%" height="5" bgcolor="#06b6d4" style="height: 5px; line-height: 5px; font-size: 1px; background: #06b6d4; border-radius: 0 10px 0 0">&nbsp;</td>' +
-      '</tr></table></td></tr>' +
-      '<tr><td style="padding: 22px 22px 18px 22px">' +
-        '<table cellpadding="0" cellspacing="0" border="0"><tr>' +
-          '<td valign="top" style="padding-right: 20px"><img src="' + esc(photo(d)) + '" width="92" height="92" alt="' + esc(d.nombre) +
-            '" style="display: block; width: 92px; height: 92px; border-radius: 50%; border: 3px solid #ede9fe" /></td>' +
-          '<td valign="top">' +
-            '<div style="font-family: ' + SANS + '; font-size: 21px; font-weight: bold; color: #1e1b4b; letter-spacing: 0.2px; line-height: 1.2">' + esc(d.nombre) + '</div>' +
-            (d.cargo.trim() ? '<div style="font-family: ' + SANS + '; font-size: 10px; font-weight: bold; color: #7c3aed; letter-spacing: 2.2px; text-transform: uppercase; margin-top: 6px">' + esc(d.cargo) + '</div>' : '') +
-            (chips ? '<table cellpadding="0" cellspacing="0" border="0" style="margin-top: 10px"><tr>' + chips + '</tr></table>' : '') +
-          '</td></tr></table>' +
-        (rows
-          ? '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 16px 0 14px 0"><tr>' +
-            '<td width="40%" height="1" style="height: 1px; line-height: 1px; font-size: 1px; background: #2563eb">&nbsp;</td>' +
-            '<td width="60%" height="1" style="height: 1px; line-height: 1px; font-size: 1px; background: #e5e7eb">&nbsp;</td></tr></table>' +
-            '<table cellpadding="0" cellspacing="0" border="0" style="font-family: ' + SANS + '; font-size: 12px; line-height: 1.9; color: #4b5563">' + rows + '</table>'
-          : '') +
-        waButton(d, "#128c7e", "", "20px", "8px 20px", "11px", "0.4px") +
-      '</td></tr></table>';
+  // Funciones de ayuda para los estilos.
+  function helpers(d) {
+    var b = base(d);
+    function imgTag(file, alt, w, hh, extra) {
+      return '<img src="' + esc(b + encodeURIComponent(file)) + '" width="' + w + '" height="' + hh + '" alt="' + esc(alt || "") +
+        '" style="display: block; width: ' + w + 'px; height: ' + hh + 'px; border: 0' + (extra ? "; " + extra : "") + '" />';
+    }
+    return {
+      esc: esc,
+      asset: function (file) { return esc(b + encodeURIComponent(file)); },
+      img: imgTag,
+      photo: function (size, extra) { return imgTag(photoName(d), d.nombre.trim(), size, size, extra); },
+      hash: function (str) {
+        var x = 5381;
+        for (var i = 0; i < str.length; i++) x = ((x << 5) + x + str.charCodeAt(i)) >>> 0;
+        return x;
+      }
+    };
   }
 
-  function current() {
-    for (var i = 0; i < radios.length; i++) if (radios[i].checked) return radios[i].value;
-    return "terminal";
+  /* ---------- carga de estilos al seleccionarlos ---------- */
+  function findManifest(id) {
+    for (var i = 0; i < manifest.length; i++) if (manifest[i].id === id) return manifest[i];
+    return null;
   }
+  function loadStyle(m) {
+    return new Promise(function (resolve, reject) {
+      if (GS.styles[m.id]) return resolve(GS.styles[m.id]);
+      var s = document.createElement("script");
+      s.src = m.file;
+      s.onload = function () {
+        GS.styles[m.id] ? resolve(GS.styles[m.id]) : reject(new Error("El archivo " + m.file + " no registró el estilo «" + m.id + "»."));
+      };
+      s.onerror = function () { reject(new Error("No se pudo cargar " + m.file + ". Verifica que la carpeta templates/ esté junto a index.html.")); };
+      document.head.appendChild(s);
+    });
+  }
+  function selectStyle(id) {
+    var m = findManifest(id) || manifest[0];
+    if (!m) return;
+    var mine = ++token;
+    activeId = m.id;
+    active = null;
+    descEl.textContent = m.description || "";
+    preview.innerHTML = msg("Cargando estilo…");
+    htmlOut.value = "";
+    save();
+    loadStyle(m).then(function (def) {
+      if (mine !== token) return;
+      active = def;
+      render();
+    }).catch(function (e) {
+      if (mine !== token) return;
+      preview.innerHTML = msg(esc(e.message));
+      infoEl.innerHTML = "";
+    });
+  }
+
+  /* ---------- formulario ---------- */
   function read() {
     var d = {};
     ids.forEach(function (id) { d[id] = els[id].value; });
     return d;
   }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify({ d: read(), tpl: current() })); } catch (e) {}
+    try { localStorage.setItem(KEY, JSON.stringify({ d: read(), tpl: activeId })); } catch (e) {}
   }
   function load() {
     try {
@@ -328,28 +327,68 @@
       return raw ? JSON.parse(raw) : null;
     } catch (e) { return null; }
   }
-  function say(m) { statusEl.textContent = m; }
-
   function hasData(d) {
-    var cfg = ["ghUser", "repo", "rama", "carpeta", "fotoArchivo"];
-    return ids.some(function (id) { return cfg.indexOf(id) < 0 && d[id].trim() !== ""; });
+    return DATA_KEYS.some(function (id) { return d[id].trim() !== ""; });
   }
+  function setUnused(id, flag) {
+    var f = els[id].closest(".field");
+    if (f) f.classList.toggle("unused", !!flag);
+  }
+  function needsImages() {
+    return !!(active && (active.photo || (active.assets && active.assets.length)));
+  }
+
+  function updateInfo(d) {
+    var used = {};
+    active.uses.forEach(function (k) {
+      used[k] = true;
+      (GROUPS[k] || []).forEach(function (x) { used[x] = true; });
+    });
+    DATA_KEYS.forEach(function (id) { setUnused(id, !used[id]); });
+    CONFIG_KEYS.forEach(function (id) { setUnused(id, !needsImages()); });
+    setUnused("fotoArchivo", !active.photo);
+
+    var files = [];
+    if (active.photo) files.push(photoName(d));
+    (active.assets || []).forEach(function (f) { files.push(f); });
+    infoEl.innerHTML =
+      '<p><strong>Datos que usa:</strong> ' + active.uses.map(function (k) { return esc(LABELS[k] || k); }).join(", ") + '.</p>' +
+      '<p><strong>Imágenes necesarias:</strong> ' +
+      (files.length ? files.map(function (f) { return "<code>" + esc(f) + "</code>"; }).join(" ") : "ninguna (solo texto).") + '</p>';
+  }
+
   function render() {
     var d = read();
+    save();
+    if (!active) return;
+    updateInfo(d);
+    warnEl.textContent = "";
     if (!hasData(d)) {
-      preview.innerHTML = '<p style="margin: 0; font-family: ' + SANS + '; font-size: 13px; color: #6b7280">Completa el formulario para ver tu firma aquí.</p>';
+      preview.innerHTML = msg("Completa el formulario para ver tu firma aquí.");
       htmlOut.value = "";
-      warnEl.textContent = "";
-      save();
       return;
     }
-    var html = current() === "editorial" ? sigEditorial(d) : sigTerminal(d);
+    var html;
+    try {
+      html = active.render(normalize(d), helpers(d));
+    } catch (e) {
+      preview.innerHTML = msg("Error en el estilo «" + esc(activeId) + "»: " + esc(e.message));
+      htmlOut.value = "";
+      return;
+    }
     preview.innerHTML = html;
     htmlOut.value = html;
-    warnEl.textContent = d.ghUser.trim() ? "" : "Falta tu usuario de GitHub: los íconos y la foto no cargarán hasta que lo completes.";
-    save();
+    var avisos = [];
+    if (needsImages() && !d.ghUser.trim()) {
+      avisos.push("Falta tu usuario de GitHub: la foto y los íconos no cargarán hasta que lo completes.");
+    }
+    if (html.length > 10000) {
+      avisos.push("La firma tiene " + html.length + " caracteres y Gmail admite como máximo 10 000. Acorta algún texto o elige otro estilo.");
+    }
+    warnEl.textContent = avisos.join(" ");
   }
 
+  /* ---------- copiar ---------- */
   function copyRich() {
     if (!htmlOut.value) { say("Completa tus datos antes de copiar la firma."); return Promise.resolve(); }
     var node = preview.firstElementChild;
@@ -362,9 +401,8 @@
     sel.removeAllRanges();
     if (ok) { say("Firma copiada. Ahora pégala en Gmail."); return Promise.resolve(); }
     if (navigator.clipboard && window.ClipboardItem) {
-      var html = htmlOut.value;
       return navigator.clipboard.write([new ClipboardItem({
-        "text/html": new Blob([html], { type: "text/html" }),
+        "text/html": new Blob([htmlOut.value], { type: "text/html" }),
         "text/plain": new Blob([node.innerText], { type: "text/plain" })
       })]).then(function () { say("Firma copiada. Ahora pégala en Gmail."); });
     }
@@ -394,15 +432,33 @@
     say(""); render();
   });
   ids.forEach(function (id) { els[id].addEventListener("input", render); });
-  Array.prototype.forEach.call(radios, function (r) { r.addEventListener("change", function () { say(""); render(); }); });
 
+  /* ---------- arranque ---------- */
   var saved = load();
   if (saved && saved.d) {
     ids.forEach(function (id) { if (typeof saved.d[id] === "string") els[id].value = saved.d[id]; });
-    Array.prototype.forEach.call(radios, function (r) { r.checked = (r.value === saved.tpl); });
-    if (current() !== saved.tpl) radios[0].checked = true;
   }
-  render();
+
+  if (!manifest.length) {
+    preview.innerHTML = msg("No se encontró <code>templates/manifest.js</code>. Verifica que la carpeta <code>templates/</code> esté junto a <code>index.html</code>.");
+    return;
+  }
+  manifest.forEach(function (m) {
+    var label = document.createElement("label");
+    label.className = "tab";
+    var input = document.createElement("input");
+    input.type = "radio";
+    input.name = "tpl";
+    input.value = m.id;
+    input.addEventListener("change", function () { say(""); selectStyle(m.id); });
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(" " + m.name));
+    stylesEl.appendChild(label);
+  });
+  var startId = (saved && findManifest(saved.tpl)) ? saved.tpl : manifest[0].id;
+  var radio = stylesEl.querySelector('input[value="' + startId + '"]');
+  if (radio) radio.checked = true;
+  selectStyle(startId);
 })();
 </script>
 </body>
