@@ -93,9 +93,17 @@
         </fieldset>
 
         <fieldset>
-          <legend>Imágenes</legend>
+          <legend>Imágenes (GitHub)</legend>
           <div class="field"><label for="ghUser">Usuario de GitHub</label><input id="ghUser" type="text">
-            <div class="hint">La foto y los íconos se toman de la carpeta <code>assets/</code> (rama main) de tu repo público <code>gmail-signature</code>. Sube allí <code>photo.jpg</code> y los íconos.</div></div>
+            <div class="hint">Obligatorio. El repositorio debe ser público.</div></div>
+          <div class="field"><label for="repo">Repositorio</label><input id="repo" type="text">
+            <div class="hint">Si lo dejas vacío se usa <code>gmail-sign</code>.</div></div>
+          <div class="field"><label for="rama">Rama</label><input id="rama" type="text">
+            <div class="hint">Si lo dejas vacío se usa <code>main</code>.</div></div>
+          <div class="field"><label for="carpeta">Carpeta de imágenes</label><input id="carpeta" type="text">
+            <div class="hint">Si lo dejas vacío se usa <code>assets</code>. Admite subcarpetas (<code>docs/img</code>). Escribe <code>/</code> si las imágenes están en la raíz del repo.</div></div>
+          <div class="field"><label for="fotoArchivo">Nombre del archivo de la foto</label><input id="fotoArchivo" type="text">
+            <div class="hint">Si lo dejas vacío se usa <code>photo.jpg</code>. Los íconos mantienen sus nombres (ver README).</div></div>
         </fieldset>
 
         <div class="bar"><button type="button" class="link" id="reset">Limpiar formulario</button></div>
@@ -141,7 +149,11 @@
     whatsapp: "+506 0000 0000",
     waTexto: "Escríbeme por WhatsApp",
     waMensaje: "Hola, te escribo desde tu firma de correo.",
-    ghUser: "tu-usuario-de-github"
+    ghUser: "tu-usuario-de-github",
+    repo: "gmail-sign",
+    rama: "main",
+    carpeta: "assets",
+    fotoArchivo: "photo.jpg"
   };
 
 
@@ -173,11 +185,18 @@
   function digits(s) { return String(s).replace(/[^\d]/g, ""); }
   function tel(s) { return String(s).replace(/[^\d+]/g, ""); }
 
+  function seg(t) {
+    return String(t).split("/").filter(Boolean).map(encodeURIComponent).join("/");
+  }
   function base(d) {
     var u = d.ghUser.trim() || "YOUR_GITHUB_USER";
-    return "https://raw.githubusercontent.com/" + encodeURIComponent(u) + "/gmail-signature/main/assets/";
+    var r = d.repo.trim() || "gmail-sign";
+    var b = d.rama.trim() || "main";
+    var f = d.carpeta.trim();
+    f = (f === "/" || f === ".") ? "" : seg(f || "assets");
+    return "https://raw.githubusercontent.com/" + encodeURIComponent(u) + "/" + encodeURIComponent(r) + "/" + seg(b) + "/" + (f ? f + "/" : "");
   }
-  function photo(d) { return base(d) + "photo.jpg"; }
+  function photo(d) { return base(d) + encodeURIComponent(d.fotoArchivo.trim() || "photo.jpg"); }
 
   function icon(d, file, alt, size) {
     return '<img src="' + base(d) + file + '" width="' + size + '" height="' + size + '" alt="' + alt +
@@ -312,7 +331,8 @@
   function say(m) { statusEl.textContent = m; }
 
   function hasData(d) {
-    return ids.some(function (id) { return d[id].trim() !== ""; });
+    var cfg = ["ghUser", "repo", "rama", "carpeta", "fotoArchivo"];
+    return ids.some(function (id) { return cfg.indexOf(id) < 0 && d[id].trim() !== ""; });
   }
   function render() {
     var d = read();

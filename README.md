@@ -16,17 +16,17 @@ Página estática (un solo archivo HTML, sin dependencias ni build) donde cada p
 ## Estructura del proyecto
 
 ```
-gmail-signature/
+gmail-signature/      # el nombre del repo también es configurable
 ├── index.html        # La página completa (HTML + CSS + JS)
 ├── README.md
-└── assets/           # Imágenes que usa la firma (ver más abajo)
+└── assets/           # Imágenes de la firma (el nombre de la carpeta es configurable)
     ├── photo.jpg
     ├── t-phone.png   t-mail.png   t-linkedin.png   t-pin.png
     ├── e-phone.png   e-mail.png   e-linkedin.png   e-pin.png
     └── wa-white.png
 ```
 
-> El repositorio **debe llamarse `gmail-signature`** y las imágenes deben estar en `assets/` de la rama `main`: la página arma las URLs con ese nombre fijo.
+> Los nombres `gmail-signature`, `main` y `assets` son solo los valores que se usan si dejas esos campos vacíos. Puedes cambiar el **repositorio**, la **rama**, la **carpeta de imágenes** y el **nombre del archivo de la foto** desde el formulario (sección *Imágenes (GitHub)*). Lo que no cambia son los nombres de los íconos.
 
 ## Cómo funciona
 
@@ -35,10 +35,10 @@ gmail-signature/
 3. Las imágenes (foto e íconos) se cargan desde:
 
    ```
-   https://raw.githubusercontent.com/<usuario>/gmail-signature/main/assets/<archivo>
+   https://raw.githubusercontent.com/<usuario>/<repositorio>/<rama>/<carpeta>/<archivo>
    ```
 
-   Por eso solo se pide el **usuario de GitHub**.
+   El **usuario de GitHub** es obligatorio. El repositorio, la rama y la carpeta son opcionales: si los dejas vacíos se usan `gmail-signature`, `main` y `assets`.
 4. Al pulsar **Copiar firma**, la firma se copia con su formato y se pega en Gmail.
 
 Los campos vacíos se omiten: sin número de WhatsApp no aparece el botón, sin estado no aparece el punto verde, y así con el resto. Los placeholders son solo una guía visual: no forman parte de la firma. Mientras el formulario esté totalmente vacío, la vista previa muestra un mensaje en lugar de la tarjeta y los botones de copiar avisan que faltan datos.
@@ -47,11 +47,11 @@ Los campos vacíos se omiten: sin número de WhatsApp no aparece el botón, sin 
 
 ### 1. Prepara el repositorio de imágenes
 
-Cada persona que use la herramienta necesita un repositorio **público** llamado `gmail-signature` con una carpeta `assets/` que contenga estos archivos:
+Cada persona que use la herramienta necesita un repositorio **público** con una carpeta de imágenes (por defecto `gmail-signature/assets/`, rama `main`; todo configurable en el formulario) que contenga estos archivos:
 
 | Archivo | Uso | Tamaño sugerido |
 |---|---|---|
-| `photo.jpg` | Foto de perfil (se recorta en círculo) | 200 × 200 px, cuadrada |
+| `photo.jpg` (o el nombre que configures) | Foto de perfil (se recorta en círculo) | 200 × 200 px, cuadrada |
 | `t-phone.png`, `t-mail.png`, `t-linkedin.png`, `t-pin.png` | Íconos del concepto Terminal | 32 × 32 px (se muestran a 16 px o 12 px) |
 | `e-phone.png`, `e-mail.png`, `e-linkedin.png`, `e-pin.png` | Íconos del concepto Editorial | 32 × 32 px |
 | `wa-white.png` | Ícono de WhatsApp para el botón | 28 × 28 px, blanco con fondo transparente |
@@ -69,7 +69,7 @@ Opciones sencillas:
 ### 3. Genera tu firma
 
 1. Abre la página y completa tus datos (los textos en gris son solo ejemplos).
-2. Escribe tu **usuario de GitHub** en la sección *Imágenes*. Mientras esté vacío, la página muestra un aviso y las imágenes no cargan.
+2. Escribe tu **usuario de GitHub** en la sección *Imágenes (GitHub)* y, si tu repo, rama o carpeta tienen otros nombres, complétalos también. Mientras esté vacío, la página muestra un aviso y las imágenes no cargan.
 3. Elige el concepto (Terminal o Editorial) y revisa la vista previa.
 4. Pulsa **Copiar firma**.
 
@@ -93,7 +93,11 @@ Opciones sencillas:
 | | Ubicación | En Terminal aparece en el pie; en Editorial, como una fila de contacto |
 | | Zona horaria, Estado | Solo Terminal |
 | WhatsApp | Número, texto del botón, mensaje inicial | Con el número vacío no se muestra el botón |
-| Imágenes | Usuario de GitHub | Define de dónde se cargan la foto y los íconos |
+| Imágenes (GitHub) | Usuario de GitHub | Obligatorio; define de dónde se cargan la foto y los íconos |
+| | Repositorio | Vacío = `gmail-signature` |
+| | Rama | Vacía = `main`. Admite nombres con barra (`feature/x`) |
+| | Carpeta de imágenes | Vacía = `assets`. Admite subcarpetas (`docs/img`); `/` o `.` significa la raíz del repo |
+| | Nombre del archivo de la foto | Vacío = `photo.jpg` |
 
 ## Privacidad
 
@@ -114,7 +118,7 @@ Todo está en `index.html`:
 
 ## Limitaciones y consejos
 
-- **Imágenes alojadas, no incrustadas:** Gmail necesita URLs públicas. Si el repo es privado o el nombre no coincide, las imágenes se verán rotas.
+- **Imágenes alojadas, no incrustadas:** Gmail necesita URLs públicas. Si el repo es privado o el usuario, repositorio, rama, carpeta o nombres de archivo no coinciden con lo que escribiste en el formulario, las imágenes se verán rotas.
 - **Caché de GitHub:** si cambias una imagen en `assets/`, `raw.githubusercontent.com` puede tardar unos minutos en reflejarlo.
 - **Clientes de correo:** algunos (por ejemplo Outlook de escritorio) ignoran partes de los estilos, como los bordes redondeados. Conviene enviarte un correo de prueba y revisarlo.
 - **Imágenes bloqueadas por defecto:** muchos clientes piden permiso antes de mostrar imágenes externas, así que algunos destinatarios verán primero la firma sin íconos.
@@ -127,7 +131,7 @@ Todo está en `index.html`:
 | Problema | Causa probable | Qué hacer |
 |---|---|---|
 | Aparece el aviso «Falta tu usuario de GitHub» | El campo está vacío | Escribe tu usuario |
-| Foto e íconos se ven rotos | Repo no público, nombre distinto de `gmail-signature`, carpeta o archivos mal nombrados | Revisa la sección *Puesta en marcha* |
+| Foto e íconos se ven rotos | Repo no público, o usuario, repositorio, rama o carpeta distintos de lo escrito en el formulario; archivos mal nombrados | Revisa la sección *Imágenes (GitHub)* y la tabla de archivos |
 | Los íconos se ven borrosos | Imágenes de tamaño muy pequeño | Usa PNG de 32 × 32 px o más |
 | La firma pegada pierde el formato | Se copió desde el área de código | Usa **Copiar firma**, no el código HTML |
 | La vista previa dice «Completa el formulario…» | Todos los campos están vacíos | Escribe al menos un dato |
