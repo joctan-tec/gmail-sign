@@ -98,7 +98,7 @@
             <div class="hint">La foto y los íconos se toman de la carpeta <code>assets/</code> (rama main) de tu repo público <code>gmail-signature</code>. Sube allí <code>photo.jpg</code> y los íconos.</div></div>
         </fieldset>
 
-        <div class="bar"><button type="button" class="link" id="reset">Restablecer datos de ejemplo</button></div>
+        <div class="bar"><button type="button" class="link" id="reset">Limpiar formulario</button></div>
       </form>
     </section>
 
@@ -125,7 +125,7 @@
 
 <script>
 (function () {
-  var DEFAULTS = {
+  var PLACEHOLDERS = {
     nombre: "Tu Nombre Apellido",
     cargo: "Tu cargo o profesión",
     frase: "// una frase corta sobre ti",
@@ -141,13 +141,17 @@
     whatsapp: "+506 0000 0000",
     waTexto: "Escríbeme por WhatsApp",
     waMensaje: "Hola, te escribo desde tu firma de correo.",
-    ghUser: ""
+    ghUser: "tu-usuario-de-github"
   };
 
-  var KEY = "gmail-sign:v3";
-  var ids = Object.keys(DEFAULTS);
+
+  var KEY = "gmail-sign:v4";
+  var ids = Object.keys(PLACEHOLDERS);
   var els = {};
-  ids.forEach(function (id) { els[id] = document.getElementById(id); });
+  ids.forEach(function (id) {
+    els[id] = document.getElementById(id);
+    els[id].placeholder = PLACEHOLDERS[id];
+  });
   var preview = document.getElementById("preview");
   var htmlOut = document.getElementById("htmlOut");
   var statusEl = document.getElementById("status");
@@ -211,7 +215,7 @@
       '<a href="' + esc(link) + '" style="display: inline-block; padding: ' + padding + '; font-family: ' + SANS + '; font-size: ' + size +
       '; font-weight: bold; color: #ffffff; text-decoration: none; letter-spacing: ' + spacing + '">' +
       '<img src="' + base(d) + 'wa-white.png" width="14" height="14" alt="" style="vertical-align: middle; width: 14px; height: 14px; border: 0; margin-right: 7px" />' +
-      esc(d.waTexto) + '</a></td></tr></table>';
+      esc(d.waTexto.trim() || "WhatsApp") + '</a></td></tr></table>';
   }
 
   /* ---------- Concepto 1 · Terminal ---------- */
@@ -307,8 +311,18 @@
   }
   function say(m) { statusEl.textContent = m; }
 
+  function hasData(d) {
+    return ids.some(function (id) { return d[id].trim() !== ""; });
+  }
   function render() {
     var d = read();
+    if (!hasData(d)) {
+      preview.innerHTML = '<p style="margin: 0; font-family: ' + SANS + '; font-size: 13px; color: #6b7280">Completa el formulario para ver tu firma aquí.</p>';
+      htmlOut.value = "";
+      warnEl.textContent = "";
+      save();
+      return;
+    }
     var html = current() === "editorial" ? sigEditorial(d) : sigTerminal(d);
     preview.innerHTML = html;
     htmlOut.value = html;
@@ -317,6 +331,7 @@
   }
 
   function copyRich() {
+    if (!htmlOut.value) { say("Completa tus datos antes de copiar la firma."); return Promise.resolve(); }
     var node = preview.firstElementChild;
     var range = document.createRange();
     range.selectNode(node);
@@ -337,6 +352,7 @@
     return Promise.resolve();
   }
   function copyHtml() {
+    if (!htmlOut.value) { say("Completa tus datos antes de copiar el código."); return Promise.resolve(); }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       return navigator.clipboard.writeText(htmlOut.value).then(function () { say("Código HTML copiado."); });
     }
@@ -354,13 +370,12 @@
     copyHtml().catch(function () { say("El navegador bloqueó la copia. Abre «Ver código HTML» y cópialo a mano."); });
   });
   document.getElementById("reset").addEventListener("click", function () {
-    ids.forEach(function (id) { els[id].value = DEFAULTS[id]; });
+    ids.forEach(function (id) { els[id].value = ""; });
     say(""); render();
   });
   ids.forEach(function (id) { els[id].addEventListener("input", render); });
   Array.prototype.forEach.call(radios, function (r) { r.addEventListener("change", function () { say(""); render(); }); });
 
-  ids.forEach(function (id) { els[id].value = DEFAULTS[id]; });
   var saved = load();
   if (saved && saved.d) {
     ids.forEach(function (id) { if (typeof saved.d[id] === "string") els[id].value = saved.d[id]; });

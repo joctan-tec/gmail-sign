@@ -10,6 +10,7 @@ Página estática (un solo archivo HTML, sin dependencias ni build) donde cada p
 - **Formulario** con identidad, contacto, botón de WhatsApp y usuario de GitHub.
 - **Vista previa en vivo** del concepto elegido.
 - **Copiar firma** (contenido enriquecido, listo para Gmail) y **Copiar código HTML**.
+- **Formulario vacío con placeholders:** ningún campo trae valores precargados; cada uno muestra un texto de ejemplo en gris hasta que la persona escribe el suyo.
 - **Persistencia local:** los datos y el concepto elegido se guardan en el navegador de cada persona.
 
 ## Estructura del proyecto
@@ -40,7 +41,7 @@ gmail-signature/
    Por eso solo se pide el **usuario de GitHub**.
 4. Al pulsar **Copiar firma**, la firma se copia con su formato y se pega en Gmail.
 
-Los campos vacíos se omiten: sin número de WhatsApp no aparece el botón, sin estado no aparece el punto verde, y así con el resto.
+Los campos vacíos se omiten: sin número de WhatsApp no aparece el botón, sin estado no aparece el punto verde, y así con el resto. Los placeholders son solo una guía visual: no forman parte de la firma. Mientras el formulario esté totalmente vacío, la vista previa muestra un mensaje en lugar de la tarjeta y los botones de copiar avisan que faltan datos.
 
 ## Puesta en marcha
 
@@ -67,7 +68,7 @@ Opciones sencillas:
 
 ### 3. Genera tu firma
 
-1. Abre la página y completa tus datos.
+1. Abre la página y completa tus datos (los textos en gris son solo ejemplos).
 2. Escribe tu **usuario de GitHub** en la sección *Imágenes*. Mientras esté vacío, la página muestra un aviso y las imágenes no cargan.
 3. Elige el concepto (Terminal o Editorial) y revisa la vista previa.
 4. Pulsa **Copiar firma**.
@@ -104,7 +105,7 @@ Todo está en `index.html`:
 
 - **Colores y tipografías de las firmas:** dentro de las funciones `sigTerminal` y `sigEditorial` (estilos en línea).
 - **Colores de las etiquetas del concepto Editorial:** arreglo `CHIPS`.
-- **Valores por defecto del formulario:** objeto `DEFAULTS`.
+- **Placeholders del formulario:** objeto `PLACEHOLDERS`. Los campos no traen valores por defecto.
 - **Apariencia de la página** (no de la firma): bloque `<style>` al inicio. Soporta modo claro y oscuro.
 - **Agregar un concepto nuevo:**
   1. Crea una función `sigNuevo(d)` que devuelva el HTML de la firma (tablas y estilos en línea).
@@ -129,4 +130,5 @@ Todo está en `index.html`:
 | Foto e íconos se ven rotos | Repo no público, nombre distinto de `gmail-signature`, carpeta o archivos mal nombrados | Revisa la sección *Puesta en marcha* |
 | Los íconos se ven borrosos | Imágenes de tamaño muy pequeño | Usa PNG de 32 × 32 px o más |
 | La firma pegada pierde el formato | Se copió desde el área de código | Usa **Copiar firma**, no el código HTML |
+| La vista previa dice «Completa el formulario…» | Todos los campos están vacíos | Escribe al menos un dato |
 | Los datos no se guardan | El navegador bloquea `localStorage` (modo privado, por ejemplo) | La firma sigue funcionando, pero tendrás que reingresar los datos |
