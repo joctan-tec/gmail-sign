@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Generador de firma para Gmail</title>
+<style>
+  :root {
+    --bg: #e5e7eb; --panel: #ffffff; --ink: #111827; --muted: #4b5563;
+    --line: #d1d5db; --brand: #2563eb; --brand-ink: #ffffff; --focus: #1d4ed8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f141b; --panel: #18202b; --ink: #e8edf4; --muted: #9aa6b8;
+      --line: #2c3748; --brand: #5b9bff; --brand-ink: #0b1220; --focus: #9cc2ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 28px 16px 56px; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 Verdana, Geneva, sans-serif; }
+  main { max-width: 1120px; margin: 0 auto; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .lead { margin: 0 0 22px; font-size: 13px; color: var(--muted); max-width: 70ch; }
+  .layout { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); gap: 20px; align-items: start; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+  section { background: var(--panel); border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  h2 { font-size: 14px; margin: 0 0 12px; }
+  fieldset { border: 0; border-top: 1px solid var(--line); margin: 14px 0 0; padding: 12px 0 0; }
+  legend { font-size: 13px; font-weight: bold; padding: 0 6px 0 0; }
+  .field { margin-bottom: 10px; }
+  label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 3px; }
+  input[type=text] { width: 100%; padding: 8px 9px; border: 1px solid var(--line); border-radius: 6px;
+    background: transparent; color: var(--ink); font: inherit; font-size: 13px; }
+  input:focus-visible, button:focus-visible, .tab:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 1px; }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tab { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid var(--line);
+    border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; margin: 0; }
+  .tab:has(input:checked) { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 14%, transparent); }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+  button { font: inherit; font-size: 12px; font-weight: bold; padding: 8px 14px; border-radius: 6px;
+    border: 1px solid var(--brand); background: var(--brand); color: var(--brand-ink); cursor: pointer; }
+  button.secondary { background: transparent; color: var(--brand); }
+  button.link { border: 0; background: none; color: var(--muted); text-decoration: underline; font-weight: normal; padding: 8px 2px; }
+  .stage { background: #ffffff; border-radius: 8px; padding: 24px; overflow-x: auto; border: 1px solid var(--line); }
+  .status { min-height: 1.4em; font-size: 12px; margin: 10px 0 0; }
+  .warn { color: #b45309; }
+  @media (prefers-color-scheme: dark) { .warn { color: #fbbf24; } }
+  details { margin-top: 14px; font-size: 13px; }
+  summary { cursor: pointer; font-weight: bold; }
+  ol { padding-left: 20px; margin: 8px 0 0; }
+  textarea { width: 100%; min-height: 140px; margin-top: 10px; font: 11px/1.4 ui-monospace, Menlo, Consolas, monospace;
+    background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Generador de firma para Gmail</h1>
+  <p class="lead">Completa los datos, elige un concepto y la firma se actualiza al instante. Luego pulsa «Copiar firma» y pégala en Gmail → Ajustes → Ver todos los ajustes → Firma.</p>
+
+  <div class="layout">
+    <section aria-labelledby="t-datos">
+      <h2 id="t-datos">Tus datos</h2>
+      <form id="form" autocomplete="off" onsubmit="return false">
+        <fieldset style="border-top:0;margin-top:0;padding-top:0">
+          <legend>Identidad</legend>
+          <div class="field"><label for="nombre">Nombre completo</label><input id="nombre" type="text"></div>
+          <div class="field"><label for="cargo">Cargo</label><input id="cargo" type="text"></div>
+          <div class="field"><label for="frase">Frase (concepto Terminal)</label><input id="frase" type="text"></div>
+          <div class="field"><label for="tags">Etiquetas (concepto Editorial)</label><input id="tags" type="text">
+            <div class="hint">Separadas por coma; se muestran hasta 5.</div></div>
+          <div class="field"><label for="prompt">Prompt del terminal</label><input id="prompt" type="text"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Contacto</legend>
+          <div class="field"><label for="telefono">Teléfono</label><input id="telefono" type="text"></div>
+          <div class="field"><label for="correo">Correo</label><input id="correo" type="text"></div>
+          <div class="field"><label for="linkedin">URL de LinkedIn</label><input id="linkedin" type="text"></div>
+          <div class="field"><label for="linkedinTexto">Texto visible de LinkedIn</label><input id="linkedinTexto" type="text"></div>
+          <div class="field"><label for="ubicacion">Ubicación</label><input id="ubicacion" type="text"></div>
+          <div class="field"><label for="zona">Zona horaria (Terminal)</label><input id="zona" type="text"></div>
+          <div class="field"><label for="estado">Estado (Terminal)</label><input id="estado" type="text">
+            <div class="hint">Déjalo vacío para ocultar el punto verde.</div></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Botón de WhatsApp</legend>
+          <div class="field"><label for="whatsapp">Número</label><input id="whatsapp" type="text">
+            <div class="hint">Déjalo vacío para ocultar el botón.</div></div>
+          <div class="field"><label for="waTexto">Texto del botón</label><input id="waTexto" type="text"></div>
+          <div class="field"><label for="waMensaje">Mensaje inicial</label><input id="waMensaje" type="text"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Imágenes</legend>
+          <div class="field"><label for="ghUser">Usuario de GitHub</label><input id="ghUser" type="text">
+            <div class="hint">La foto y los íconos se toman de la carpeta <code>assets/</code> (rama main) de tu repo público <code>gmail-signature</code>. Sube allí <code>photo.jpg</code> y los íconos.</div></div>
+        </fieldset>
+
+        <div class="bar"><button type="button" class="link" id="reset">Restablecer datos de ejemplo</button></div>
+      </form>
+    </section>
+
+    <section aria-labelledby="t-prev">
+      <h2 id="t-prev">Vista previa</h2>
+      <div class="tabs" role="radiogroup" aria-label="Concepto">
+        <label class="tab"><input type="radio" name="tpl" value="terminal" checked> Concepto 1 · Terminal</label>
+        <label class="tab"><input type="radio" name="tpl" value="editorial"> Concepto 2 · Editorial</label>
+      </div>
+      <div class="stage" id="preview" aria-live="polite"></div>
+      <div class="bar">
+        <button type="button" id="copiar">Copiar firma</button>
+        <button type="button" class="secondary" id="copiarHtml">Copiar código HTML</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+      <p class="status warn" id="warn" role="status"></p>
+      <details>
+        <summary>Ver código HTML</summary>
+        <textarea id="htmlOut" readonly></textarea>
+      </details>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  var DEFAULTS = {
+    nombre: "Tu Nombre Apellido",
+    cargo: "Tu cargo o profesión",
+    frase: "// una frase corta sobre ti",
+    tags: "Etiqueta 1, Etiqueta 2, Etiqueta 3",
+    prompt: "usuario@ciudad",
+    telefono: "+506 0000 0000",
+    correo: "tu@correo.com",
+    linkedin: "https://www.linkedin.com/in/tu-usuario/",
+    linkedinTexto: "linkedin.com/in/tu-usuario",
+    ubicacion: "Ciudad, País",
+    zona: "UTC-6",
+    estado: "online",
+    whatsapp: "+506 0000 0000",
+    waTexto: "Escríbeme por WhatsApp",
+    waMensaje: "Hola, te escribo desde tu firma de correo.",
+    ghUser: ""
+  };
+
+  var KEY = "gmail-sign:v3";
+  var ids = Object.keys(DEFAULTS);
+  var els = {};
+  ids.forEach(function (id) { els[id] = document.getElementById(id); });
+  var preview = document.getElementById("preview");
+  var htmlOut = document.getElementById("htmlOut");
+  var statusEl = document.getElementById("status");
+  var warnEl = document.getElementById("warn");
+  var radios = document.querySelectorAll('input[name="tpl"]');
+
+  var MONO = "&quot;Courier New&quot;, Courier, monospace";
+  var SANS = "Verdana, Geneva, sans-serif";
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function safeUrl(u) {
+    u = (u || "").trim();
+    if (!u) return "";
+    if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+    return /^https?:\/\/[^\s"'<>]+$/i.test(u) ? u : "";
+  }
+  function digits(s) { return String(s).replace(/[^\d]/g, ""); }
+  function tel(s) { return String(s).replace(/[^\d+]/g, ""); }
+
+  function base(d) {
+    var u = d.ghUser.trim() || "YOUR_GITHUB_USER";
+    return "https://raw.githubusercontent.com/" + encodeURIComponent(u) + "/gmail-signature/main/assets/";
+  }
+  function photo(d) { return base(d) + "photo.jpg"; }
+
+  function icon(d, file, alt, size) {
+    return '<img src="' + base(d) + file + '" width="' + size + '" height="' + size + '" alt="' + alt +
+      '" style="display: block; width: ' + size + 'px; height: ' + size + 'px; border: 0" />';
+  }
+  function row(d, file, alt, inner) {
+    return '<tr><td valign="middle" style="padding-right: 10px">' + icon(d, file, alt, 16) +
+      '</td><td>' + inner + '</td></tr>';
+  }
+  function contactRows(d, p, linkColor, textColor, withPin) {
+    var out = "";
+    if (d.telefono.trim())
+      out += row(d, p + "phone.png", "Phone", '<a href="tel:' + esc(tel(d.telefono)) + '" style="color: ' + textColor + '; text-decoration: none">' + esc(d.telefono) + '</a>');
+    if (d.correo.trim())
+      out += row(d, p + "mail.png", "Email", '<a href="mailto:' + esc(d.correo.trim()) + '" style="color: ' + textColor + '; text-decoration: none">' + esc(d.correo) + '</a>');
+    var li = safeUrl(d.linkedin);
+    if (li) {
+      var txt = d.linkedinTexto.trim() || li.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "");
+      out += row(d, p + "linkedin.png", "LinkedIn", '<a href="' + esc(li) + '" style="color: ' + linkColor + '; text-decoration: none">' + esc(txt) + '</a>');
+    }
+    if (withPin && d.ubicacion.trim())
+      out += row(d, p + "pin.png", "Location", esc(d.ubicacion));
+    return out;
+  }
+  function waLink(d) {
+    var n = digits(d.whatsapp);
+    if (!n) return "";
+    return "https://wa.me/" + n + (d.waMensaje.trim() ? "?text=" + encodeURIComponent(d.waMensaje.trim()) : "");
+  }
+  function waButton(d, bg, border, radius, padding, size, spacing) {
+    var link = waLink(d);
+    if (!link) return "";
+    return '<table cellpadding="0" cellspacing="0" border="0" style="margin-top: 14px"><tr>' +
+      '<td bgcolor="' + bg + '" style="background: ' + bg + ';' + (border ? ' border: 1px solid ' + border + ';' : '') + ' border-radius: ' + radius + '">' +
+      '<a href="' + esc(link) + '" style="display: inline-block; padding: ' + padding + '; font-family: ' + SANS + '; font-size: ' + size +
+      '; font-weight: bold; color: #ffffff; text-decoration: none; letter-spacing: ' + spacing + '">' +
+      '<img src="' + base(d) + 'wa-white.png" width="14" height="14" alt="" style="vertical-align: middle; width: 14px; height: 14px; border: 0; margin-right: 7px" />' +
+      esc(d.waTexto) + '</a></td></tr></table>';
+  }
+
+  /* ---------- Concepto 1 · Terminal ---------- */
+  function sigTerminal(d) {
+    var rows = contactRows(d, "t-", "#58a6ff", "#c9d1d9", false);
+    var footerText = [d.ubicacion.trim() ? esc(d.ubicacion) : "", d.zona.trim() ? esc(d.zona) : ""].filter(Boolean).join(" &middot; ");
+    if (d.estado.trim()) footerText += ' &nbsp;&nbsp;<span style="color: #27c93f">&#9679;</span> ' + esc(d.estado);
+    var footer = footerText
+      ? '<tr><td bgcolor="#161b22" style="background: #161b22; padding: 8px 14px; border-top: 1px solid #30363d; border-radius: 0 0 9px 9px; font-family: ' + MONO + '; font-size: 10px; color: #8b949e">' +
+        '<table cellpadding="0" cellspacing="0" border="0"><tr>' +
+        (d.ubicacion.trim() ? '<td valign="middle" style="padding-right: 6px">' + icon(d, "t-pin.png", "Location", 12) + '</td>' : '') +
+        '<td style="font-family: ' + MONO + '; font-size: 10px; color: #8b949e">' + footerText + '</td></tr></table></td></tr>'
+      : '';
+
+    return '<table id="sig" cellpadding="0" cellspacing="0" border="0" width="520" style="width: 520px; max-width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 10px; border-collapse: separate">' +
+      '<tr><td bgcolor="#161b22" style="background: #161b22; padding: 9px 14px; border-bottom: 1px solid #30363d; border-radius: 9px 9px 0 0; font-family: ' + MONO + '; font-size: 11px; color: #8b949e">' +
+        '<span style="color: #ff5f56; font-size: 13px">&#9679;</span>&nbsp;<span style="color: #ffbd2e; font-size: 13px">&#9679;</span>&nbsp;<span style="color: #27c93f; font-size: 13px">&#9679;</span>&nbsp;&nbsp;' +
+        esc(d.prompt) + ' <span style="color: #58a6ff">~</span> % whoami</td></tr>' +
+      '<tr><td style="padding: 20px 20px 16px 20px; background: #0d1117">' +
+        '<table cellpadding="0" cellspacing="0" border="0"><tr>' +
+          '<td valign="top" style="padding-right: 18px"><img src="' + esc(photo(d)) + '" width="88" height="88" alt="' + esc(d.nombre) +
+            '" style="display: block; width: 88px; height: 88px; border-radius: 50%; border: 2px solid #58a6ff" /></td>' +
+          '<td valign="top">' +
+            '<div style="font-family: ' + SANS + '; font-size: 20px; font-weight: bold; color: #f0f6fc; letter-spacing: 0.3px; line-height: 1.2">' + esc(d.nombre) + '</div>' +
+            (d.cargo.trim() ? '<div style="font-family: ' + MONO + '; font-size: 12px; color: #58a6ff; margin-top: 6px">&gt; ' + esc(d.cargo) + '<span style="color: #7ee787">_</span></div>' : '') +
+            (d.frase.trim() ? '<div style="font-family: ' + MONO + '; font-size: 11px; color: #8b949e; margin-top: 4px">' + esc(d.frase) + '</div>' : '') +
+          '</td></tr></table>' +
+        (rows
+          ? '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 16px 0 12px 0"><tr><td height="1" style="height: 1px; line-height: 1px; font-size: 1px; background: #30363d">&nbsp;</td></tr></table>' +
+            '<table cellpadding="0" cellspacing="0" border="0" style="font-family: ' + MONO + '; font-size: 12px; line-height: 1.9">' + rows + '</table>'
+          : '') +
+        waButton(d, "#238636", "#2ea043", "6px", "8px 18px", "12px", "0.3px") +
+      '</td></tr>' + footer + '</table>';
+  }
+
+  /* ---------- Concepto 2 · Editorial ---------- */
+  var CHIPS = [
+    { bg: "#eff6ff", bd: "#bfdbfe", c: "#1d4ed8" },
+    { bg: "#f5f3ff", bd: "#ddd6fe", c: "#6d28d9" },
+    { bg: "#ecfeff", bd: "#a5f3fc", c: "#0e7490" }
+  ];
+  function sigEditorial(d) {
+    var tags = d.tags.split(",").map(function (t) { return t.trim(); }).filter(Boolean).slice(0, 5);
+    var chips = tags.map(function (t, i) {
+      var k = CHIPS[i % 3];
+      return (i ? '<td width="6">&nbsp;</td>' : '') +
+        '<td style="background: ' + k.bg + '; border: 1px solid ' + k.bd + '; border-radius: 12px; padding: 2px 10px; font-family: ' + SANS + '; font-size: 10px; color: ' + k.c + '">' + esc(t) + '</td>';
+    }).join("");
+    var rows = contactRows(d, "e-", "#374151", "#374151", true);
+
+    return '<table id="sig" cellpadding="0" cellspacing="0" border="0" width="520" style="width: 520px; max-width: 100%; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; border-collapse: separate">' +
+      '<tr><td style="border-radius: 10px 10px 0 0; padding: 0"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
+        '<td width="40%" height="5" bgcolor="#2563eb" style="height: 5px; line-height: 5px; font-size: 1px; background: #2563eb; border-radius: 10px 0 0 0">&nbsp;</td>' +
+        '<td width="35%" height="5" bgcolor="#7c3aed" style="height: 5px; line-height: 5px; font-size: 1px; background: #7c3aed">&nbsp;</td>' +
+        '<td width="25%" height="5" bgcolor="#06b6d4" style="height: 5px; line-height: 5px; font-size: 1px; background: #06b6d4; border-radius: 0 10px 0 0">&nbsp;</td>' +
+      '</tr></table></td></tr>' +
+      '<tr><td style="padding: 22px 22px 18px 22px">' +
+        '<table cellpadding="0" cellspacing="0" border="0"><tr>' +
+          '<td valign="top" style="padding-right: 20px"><img src="' + esc(photo(d)) + '" width="92" height="92" alt="' + esc(d.nombre) +
+            '" style="display: block; width: 92px; height: 92px; border-radius: 50%; border: 3px solid #ede9fe" /></td>' +
+          '<td valign="top">' +
+            '<div style="font-family: ' + SANS + '; font-size: 21px; font-weight: bold; color: #1e1b4b; letter-spacing: 0.2px; line-height: 1.2">' + esc(d.nombre) + '</div>' +
+            (d.cargo.trim() ? '<div style="font-family: ' + SANS + '; font-size: 10px; font-weight: bold; color: #7c3aed; letter-spacing: 2.2px; text-transform: uppercase; margin-top: 6px">' + esc(d.cargo) + '</div>' : '') +
+            (chips ? '<table cellpadding="0" cellspacing="0" border="0" style="margin-top: 10px"><tr>' + chips + '</tr></table>' : '') +
+          '</td></tr></table>' +
+        (rows
+          ? '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 16px 0 14px 0"><tr>' +
+            '<td width="40%" height="1" style="height: 1px; line-height: 1px; font-size: 1px; background: #2563eb">&nbsp;</td>' +
+            '<td width="60%" height="1" style="height: 1px; line-height: 1px; font-size: 1px; background: #e5e7eb">&nbsp;</td></tr></table>' +
+            '<table cellpadding="0" cellspacing="0" border="0" style="font-family: ' + SANS + '; font-size: 12px; line-height: 1.9; color: #4b5563">' + rows + '</table>'
+          : '') +
+        waButton(d, "#128c7e", "", "20px", "8px 20px", "11px", "0.4px") +
+      '</td></tr></table>';
+  }
+
+  function current() {
+    for (var i = 0; i < radios.length; i++) if (radios[i].checked) return radios[i].value;
+    return "terminal";
+  }
+  function read() {
+    var d = {};
+    ids.forEach(function (id) { d[id] = els[id].value; });
+    return d;
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify({ d: read(), tpl: current() })); } catch (e) {}
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+  function say(m) { statusEl.textContent = m; }
+
+  function render() {
+    var d = read();
+    var html = current() === "editorial" ? sigEditorial(d) : sigTerminal(d);
+    preview.innerHTML = html;
+    htmlOut.value = html;
+    warnEl.textContent = d.ghUser.trim() ? "" : "Falta tu usuario de GitHub: los íconos y la foto no cargarán hasta que lo completes.";
+    save();
+  }
+
+  function copyRich() {
+    var node = preview.firstElementChild;
+    var range = document.createRange();
+    range.selectNode(node);
+    var sel = window.getSelection();
+    sel.removeAllRanges(); sel.addRange(range);
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    sel.removeAllRanges();
+    if (ok) { say("Firma copiada. Ahora pégala en Gmail."); return Promise.resolve(); }
+    if (navigator.clipboard && window.ClipboardItem) {
+      var html = htmlOut.value;
+      return navigator.clipboard.write([new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([node.innerText], { type: "text/plain" })
+      })]).then(function () { say("Firma copiada. Ahora pégala en Gmail."); });
+    }
+    say("No se pudo copiar. Selecciona la firma y presiona Ctrl+C.");
+    return Promise.resolve();
+  }
+  function copyHtml() {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(htmlOut.value).then(function () { say("Código HTML copiado."); });
+    }
+    htmlOut.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    say(ok ? "Código HTML copiado." : "No se pudo copiar. Abre «Ver código HTML» y cópialo a mano.");
+    return Promise.resolve();
+  }
+
+  document.getElementById("copiar").addEventListener("click", function () {
+    copyRich().catch(function () { say("El navegador bloqueó la copia. Selecciona la firma y presiona Ctrl+C."); });
+  });
+  document.getElementById("copiarHtml").addEventListener("click", function () {
+    copyHtml().catch(function () { say("El navegador bloqueó la copia. Abre «Ver código HTML» y cópialo a mano."); });
+  });
+  document.getElementById("reset").addEventListener("click", function () {
+    ids.forEach(function (id) { els[id].value = DEFAULTS[id]; });
+    say(""); render();
+  });
+  ids.forEach(function (id) { els[id].addEventListener("input", render); });
+  Array.prototype.forEach.call(radios, function (r) { r.addEventListener("change", function () { say(""); render(); }); });
+
+  ids.forEach(function (id) { els[id].value = DEFAULTS[id]; });
+  var saved = load();
+  if (saved && saved.d) {
+    ids.forEach(function (id) { if (typeof saved.d[id] === "string") els[id].value = saved.d[id]; });
+    Array.prototype.forEach.call(radios, function (r) { r.checked = (r.value === saved.tpl); });
+    if (current() !== saved.tpl) radios[0].checked = true;
+  }
+  render();
+})();
+</script>
+</body>
+</html>
