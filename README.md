@@ -29,7 +29,7 @@ El detalle de qué datos usa cada estilo está en [`templates/README.md`](templa
 ## Estructura del proyecto
 
 ```
-gmail-signature/          # el nombre del repo también es configurable
+gmail-sign/          # el nombre del repo también es configurable
 ├── index.html            # La página: formulario, vista previa y carga de estilos
 ├── README.md
 ├── templates/
@@ -63,7 +63,7 @@ gmail-signature/          # el nombre del repo también es configurable
    https://raw.githubusercontent.com/<usuario>/<repositorio>/<rama>/<carpeta>/<archivo>
    ```
 
-   El **usuario de GitHub** es obligatorio cuando el estilo usa imágenes. El repositorio, la rama y la carpeta son opcionales: si los dejas vacíos se usan `gmail-signature`, `main` y `assets`.
+   El **usuario de GitHub** es obligatorio cuando el estilo usa imágenes. El repositorio, la rama y la carpeta son opcionales: si los dejas vacíos se usan `gmail-sign`, `main` y `assets`.
 6. **Copiar firma** deja la firma con su formato en el portapapeles, lista para pegar.
 
 Los campos vacíos se omiten: sin número de WhatsApp no aparece el botón, sin estado no aparece el punto verde, y así con el resto. Los placeholders son solo una guía visual y no forman parte de la firma. Mientras el formulario esté sin datos, la vista previa muestra un mensaje y los botones de copiar avisan que faltan datos.
@@ -72,7 +72,7 @@ Los campos vacíos se omiten: sin número de WhatsApp no aparece el botón, sin 
 
 ### 1. Prepara el repositorio de imágenes
 
-Si vas a usar un estilo con imágenes, necesitas un repositorio **público** con una carpeta de imágenes (por defecto `gmail-signature/assets/`, rama `main`; todo es configurable en el formulario). Qué archivos hacen falta depende del estilo: la página lo indica debajo de la vista previa. El **Minimalista** no necesita ninguno.
+Si vas a usar un estilo con imágenes, necesitas un repositorio **público** con una carpeta de imágenes (por defecto `gmail-sign/assets/`, rama `main`; todo es configurable en el formulario). Qué archivos hacen falta depende del estilo: la página lo indica debajo de la vista previa. El **Minimalista** no necesita ninguno.
 
 | Archivo | Uso | Tamaño sugerido |
 |---|---|---|
@@ -116,7 +116,7 @@ Usa PNG con fondo transparente para los íconos. Los de Terminal deben verse bie
 | | Zona horaria, Estado | Los usan Terminal, Retro y Boarding pass |
 | WhatsApp | Número, texto del botón, mensaje inicial | Con el número vacío no se muestra el botón |
 | Imágenes (GitHub) | Usuario de GitHub | Obligatorio si el estilo usa imágenes |
-| | Repositorio | Vacío = `gmail-signature` |
+| | Repositorio | Vacío = `gmail-sign` |
 | | Rama | Vacía = `main`. Admite nombres con barra (`feature/x`) |
 | | Carpeta de imágenes | Vacía = `assets`. Admite subcarpetas (`docs/img`); `/` o `.` significa la raíz del repo |
 | | Nombre del archivo de la foto | Vacío = `photo.jpg` |
