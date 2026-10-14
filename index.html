@@ -112,7 +112,7 @@
           <div class="field"><label for="ghUser">Usuario de GitHub</label><input id="ghUser" type="text">
             <div class="hint">Obligatorio si el estilo usa imágenes. El repositorio debe ser público.</div></div>
           <div class="field"><label for="repo">Repositorio</label><input id="repo" type="text">
-            <div class="hint">Si lo dejas vacío se usa <code>gmail-signature</code>.</div></div>
+            <div class="hint">Si lo dejas vacío se usa <code>gmail-sign</code>.</div></div>
           <div class="field"><label for="rama">Rama</label><input id="rama" type="text">
             <div class="hint">Si lo dejas vacío se usa <code>main</code>.</div></div>
           <div class="field"><label for="carpeta">Carpeta de imágenes</label><input id="carpeta" type="text">
@@ -166,7 +166,7 @@
     waTexto: "Escríbeme por WhatsApp",
     waMensaje: "Hola, te escribo desde tu firma de correo.",
     ghUser: "tu-usuario-de-github",
-    repo: "gmail-signature",
+    repo: "gmail-sign",
     rama: "main",
     carpeta: "assets",
     fotoArchivo: "photo.jpg"
@@ -221,7 +221,7 @@
 
   function base(d) {
     var u = d.ghUser.trim() || "YOUR_GITHUB_USER";
-    var r = d.repo.trim() || "gmail-signature";
+    var r = d.repo.trim() || "gmail-sign";
     var b = d.rama.trim() || "main";
     var f = d.carpeta.trim();
     f = (f === "/" || f === ".") ? "" : seg(f || "assets");
